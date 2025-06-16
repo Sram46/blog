@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>News & Blog Reader</title>
+  <!-- Bootstrap CSS CDN -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeo9Fj3LY4Yh75vZ5LqT9pGNUQZ6eGZI3G7jcFjMz/3Q9ct"
+    crossorigin="anonymous"
+  />
+  <!-- Material Icons -->
+  <link
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet"
+  />
+  <style>
+    /* Root color variables for light and dark mode */
+    :root {
+      --bs-body-bg: #ffffff;
+      --bs-body-color: #212529;
+      --bs-card-bg: #fff;
+      --bs-card-shadow: rgba(0, 0, 0, 0.1);
+      --bs-link-color: #0d6efd;
+      --scrollbar-bg: #f1f1f1;
+      --scrollbar-thumb: #c1c1c1;
+      --header-bg: #f8f9fa;
+      --sidebar-bg: #fbfcfd;
+      --sidebar-border: #e0e0e0;
+      --font-family: 'Roboto', Arial, sans-serif;
+      --btn-primary-bg: #1a73e8;
+      --btn-primary-hover-bg: #1669c1;
+      --btn-primary-color: #fff;
+    }
+    [data-theme='dark'] {
+      --bs-body-bg: #121212;
+      --bs-body-color: #e0e0e0;
+      --bs-card-bg: #1e1e1e;
+      --bs-card-shadow: rgba(255, 255, 255, 0.05);
+      --bs-link-color: #8ab4f8;
+      --scrollbar-bg: #2b2b2b;
+      --scrollbar-thumb: #555555;
+      --header-bg: #1f1f1f;
+      --sidebar-bg: #232323;
+      --sidebar-border: #444444;
+      --btn-primary-bg: #3a81f1;
+      --btn-primary-hover-bg: #2f66c1;
+      --btn-primary-color: #fff;
+    }
+
+    body {
+      background-color: var(--bs-body-bg);
+      color: var(--bs-body-color);
+      font-family: var(--font-family);
+      overflow-y: scroll;
+      min-height: 100vh;
+    }
+    a,
+    a:hover,
+    a:focus {
+      color: var(--bs-link-color);
+      text-decoration: none;
+      outline: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+      background: var(--scrollbar-bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 10px;
+    }
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1040;
+      background-color: var(--header-bg);
+      box-shadow: 0 2px 4px var(--bs-card-shadow);
+      backdrop-filter: saturate(180%) blur(10px);
+    }
+    .navbar {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0.5rem 1rem;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--bs-link-color);
+      cursor: pointer;
+      user-select: none;
+    }
+    /* Search bar */
+    #searchInput {
+      border-radius: 24px;
+      padding: 0.35rem 1rem;
+      border: 1px solid #ced4da;
+      width: 100%;
+      max-width: 420px;
+      transition: border-color 0.3s ease;
+    }
+    #searchInput:focus {
+      border-color: var(--btn-primary-bg);
+      outline: none;
+      box-shadow: 0 0 8px var(--btn-primary-bg);
+    }
+    /* Category tabs */
+    #categoryTabs {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--sidebar-border);
+      background-color: var(--sidebar-bg);
+    }
+    #categoryTabs button {
+      border-radius: 16px;
+      margin: 0 0.3rem;
+      font-weight: 600;
+      padding: 0.4rem 1rem;
+      border: none;
+      background: #e9ecef;
+      color: #495057;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+    #categoryTabs button.active {
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-color);
+      box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+    }
+    #categoryTabs button:hover:not(.active) {
+      background: #dee2e6;
+    }
+
+    /* Layout grid */
+    .app-container {
+      max-width: 1200px;
+      margin: 1rem auto 4rem auto;
+      display: grid;
+      grid-template-columns: 300px 1fr 280px;
+      grid-gap: 1.5rem;
+      min-height: calc(100vh - 100px);
+    }
+    @media (max-width: 1024px) {
+      .app-container {
+        grid-template-columns: 1fr 280px;
+      }
+      .left-sidebar {
+        display: none;
+      }
+    }
+    @media (max-width: 768px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+      .right-sidebar {
+        display: none;
+      }
+    }
+    /* Sidebars */
+    .left-sidebar,
+    .right-sidebar {
+      background: var(--sidebar-bg);
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 8px var(--bs-card-shadow);
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      overflow-y: auto;
+      max-height: calc(100vh - 130px);
+    }
+    .left-sidebar {
+      border-right: 1px solid var(--sidebar-border);
+    }
+    .right-sidebar {
+      border-left: 1px solid var(--sidebar-border);
+    }
+    /* Sidebar headings */
+    .sidebar-heading {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--bs-link-color);
+      user-select: none;
+    }
+    /* Lists */
+    ul.category-list,
+    ul.trending-list,
+    ul.bookmarks-list,
+    ul.reading-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      overflow-y: auto;
+      max-height: 280px;
+    }
+    ul li {
+      padding: 0.3rem 0.2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    ul li:hover {
+      background-color: var(--btn-primary-bg);
+      color: var(--btn-primary-color);
+    }
+    ul li .badge {
+      font-size: 0.7rem;
+      user-select: none;
+      pointer-events: none;
+    }
+    /* Article feed */
+    .article-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      padding-right: 0.5rem;
+      overflow-y: auto;
+      max-height: calc(100vh - 130px);
+    }
+    /* Article card */
+    .article-card {
+      background: var(--bs-card-bg);
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 12px var(--bs-card-shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.3s ease;
+      user-select: none;
+    }
+    .article-card:hover {
+      box-shadow: 0 8px 20px rgba(26, 115, 232, 0.3);
+    }
+    .card-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      user-select: none;
+    }
+    .article-content {
+      padding: 1rem 1.5rem 1.25rem 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .article-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--bs-link-color);
+      cursor: pointer;
+    }
+    .article-summary {
+      font-size: 0.95rem;
+      flex-grow: 1;
+      color: #495057;
+      margin-bottom: 10px;
+      line-height: 1.4;
+      user-select: text;
+    }
+    .article-meta {
+      font-size: 0.8rem;
+      color: #868e96;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .article-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      user-select: none;
+    }
+    .article-meta .material-icons {
+      font-size: 14px;
+    }
+    /* Article tags */
+    .article-tags {
+      margin-top: 0.7rem;
+    }
+    .article-tag {
+      display: inline-block;
+      background-color: #e9ecef;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.7rem;
+      margin-right: 0.4rem;
+      color: #495057;
+      user-select: none;
+      cursor: default;
+      transition: background-color 0.3s ease;
+    }
+    .article-tag:hover {
+      background-color: var(--btn-primary-bg);
+      color: var(--btn-primary-color);
+    }
+    /* Button primary */
+    .btn-primary {
+      background-color: var(--btn-primary-bg);
+      border-color: var(--btn-primary-bg);
+      color: var(--btn-primary-color);
+      font-weight: 600;
+      border-radius: 1.5rem;
+      padding: 0.4rem 1.25rem;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+    .btn-primary:hover,
+    .btn-primary:focus {
+      background-color: var(--btn-primary-hover-bg);
+      border-color: var(--btn-primary-hover-bg);
+      color: var(--btn-primary-color);
+      outline: none;
+    }
+    /* Buttons and small controls */
+    .btn-link {
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn-link:hover {
+      text-decoration: underline;
+    }
+    /* Bookmark icon toggle */
+    .bookmark-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #868e96;
+      font-size: 20px;
+      transition: color 0.3s ease;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .bookmark-btn.active {
+      color: var(--btn-primary-bg);
+    }
+    .bookmark-btn:focus {
+      outline: 2px solid var(--btn-primary-bg);
+      outline-offset: 2px;
+    }
+    /* User menu dropdown */
+    .user-menu-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--bs-link-color);
+      font-size: 28px;
+      user-select: none;
+      padding: 0 8px;
+    }
+    .user-menu {
+      position: absolute;
+      top: 3.6rem;
+      right: 1rem;
+      background: var(--bs-card-bg);
+      border-radius: 0.75rem;
+      box-shadow: 0 6px 16px var(--bs-card-shadow);
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+      min-width: 180px;
+      z-index: 1050;
+    }
+    .user-menu.show {
+      display: flex;
+    }
+    .user-menu a,
+    .user-menu button {
+      padding: 0.75rem 1.25rem;
+      color: var(--bs-body-color);
+      text-align: left;
+      border: none;
+      background: none;
+      width: 100%;
+      font-size: 1rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.15s ease;
+    }
+    .user-menu a:hover,
+    .user-menu button:hover {
+      background-color: var(--btn-primary-bg);
+      color: var(--btn-primary-color);
+      outline: none;
+    }
+    /* Modal fixes */
+    .modal-content {
+      border-radius: 0.75rem;
+      background-color: var(--bs-card-bg);
+      color: var(--bs-body-color);
+    }
+    /* Form inputs */
+    .form-control:focus {
+      border-color: var(--btn-primary-bg);
+      box-shadow: 0 0 6px var(--btn-primary-bg);
+    }
+    /* Article full view modal */
+    #articleModal .modal-body {
+      max-height: 60vh;
+      overflow-y: auto;
+      user-select: text;
+    }
+    /* Loading spinner centered */
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+    }
+    /* Infinite scroll loader */
+    .infinite-scroll-loader {
+      text-align: center;
+      padding: 16px 0;
+      color: #6c757d;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+    /* Badge colored by category */
+    .badge-category {
+      border-radius: 12px;
+      padding: 0.2em 0.6em;
+      font-size: 0.75rem;
+      font-weight: 600;
+      user-select: none;
+      cursor: default;
+      color: #fff;
+      display: inline-block;
+    }
+    /* Scroll area */
+    .scrollable {
+      overflow-y: auto;
+    }
+    /* Topic creation form */
+    .topic-creator {
+      margin-bottom: 1rem;
+    }
+    /* Blog post creation form */
+    .blog-post-creator {
+      margin-bottom: 1rem;
+    }
+    /* Floating action button */
+    #fabAddPost {
+      position: fixed;
+      bottom: 3rem;
+      right: 2.5rem;
+      background-color: var(--btn-primary-bg);
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      box-shadow: 0 6px 16px rgba(26, 115, 232, 0.5);
+      color: var(--btn-primary-color);
+      border: none;
+      font-size: 32px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      z-index: 1100;
+      transition: background-color 0.3s ease;
+    }
+    #fabAddPost:hover {
+      background-color: var(--btn-primary-hover-bg);
+    }
+    /* Dark mode toggle */
+    #darkModeToggle {
+      cursor: pointer;
+      user-select: none;
+      font-size: 24px;
+      color: var(--bs-link-color);
+      transition: color 0.25s ease;
+    }
+    #darkModeToggle:hover {
+      color: var(--btn-primary-bg);
+    }
+    /* Font size toggle */
+    #fontSizeControl {
+      user-select: none;
+      font-size: 1rem;
+    }
+    /* Reading progress ring */
+    .reading-progress-ring {
+      position: relative;
+      width: 36px;
+      height: 36px;
+    }
+    svg.progress-ring-circle {
+      transform: rotate(-90deg);
+      overflow: visible;
+    }
+    circle.progress-ring-bg {
+      fill: transparent;
+      stroke: #e6e6e6;
+      stroke-width: 4;
+    }
+    circle.progress-ring {
+      fill: transparent;
+      stroke: var(--btn-primary-bg);
+      stroke-width: 4;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.25s ease;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg px-3">
+      <a class="navbar-brand" href="#" id="navLogo">NewsBlog</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarContent"
+        aria-controls="navbarContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="material-icons">menu</span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <form class="d-flex ms-3 me-auto" role="search" onsubmit="return false;">
+          <input
+            class="form-control"
+            type="search"
+            placeholder="Search articles or topics..."
+            aria-label="Search"
+            id="searchInput"
+          />
+        </form>
+
+        <ul class="navbar-nav align-items-center gap-3">
+          <li class="nav-item d-flex align-items-center gap-2">
+            <button
+              id="darkModeToggle"
+              class="btn btn-link"
+              title="Toggle dark/light mode"
+              aria-label="Toggle dark/light mode"
+              type="button"
+            >
+              <span class="material-icons" id="darkModeIcon">dark_mode</span>
+            </button>
+          </li>
+          <li class="nav-item dropdown" style="position: relative;">
+            <button
+              class="btn user-menu-btn"
+              id="userMenuBtn"
+              aria-expanded="false"
+              aria-haspopup="true"
+              aria-label="User menu"
+              type="button"
+            >
+              <span class="material-icons">account_circle</span>
+            </button>
+            <div class="user-menu" id="userMenu" role="menu" aria-labelledby="userMenuBtn" tabindex="-1">
+              <a href="#" id="loginMenuItem" role="menuitem">Login</a>
+              <a href="#" id="profileMenuItem" role="menuitem" style="display:none;">Profile</a>
+              <button id="logoutMenuItem" role="menuitem" style="display:none;">Logout</button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <nav id="categoryTabs" aria-label="Category Tabs" role="tablist" tabindex="0" aria-live="polite">
+      <!-- Dynamic category buttons go here -->
+    </nav>
+  </header>
+
+  <main class="app-container" tabindex="0">
+    <aside class="left-sidebar" aria-label="Categories and Trending Topics">
+      <section aria-labelledby="sidebarCategoriesHeading">
+        <h2 class="sidebar-heading" id="sidebarCategoriesHeading">Categories</h2>
+        <ul class="category-list" id="categoryList" role="listbox" aria-multiselectable="true" tabindex="0"></ul>
+      </section>
+      <section aria-labelledby="sidebarTrendingHeading">
+        <h2 class="sidebar-heading" id="sidebarTrendingHeading">Trending Topics</h2>
+        <ul class="trending-list" id="trendingList"></ul>
+      </section>
+    </aside>
+
+    <section class="article-feed" id="articleFeed" aria-live="polite" aria-relevant="additions" tabindex="0">
+      <!-- Articles loaded here -->
+    </section>
+
+    <aside class="right-sidebar" aria-label="Bookmarks and Reading List">
+      <section aria-labelledby="bookmarksHeading">
+        <h2 class="sidebar-heading" id="bookmarksHeading">Bookmarks</h2>
+        <ul class="bookmarks-list" id="bookmarksList"></ul>
+      </section>
+      <section aria-labelledby="readingListHeading">
+        <h2 class="sidebar-heading" id="readingListHeading">Reading List</h2>
+        <ul class="reading-list" id="readingList"></ul>
+      </section>
+    </aside>
+  </main>
+
+  <!-- Login Modal -->
+  <div
+    class="modal fade"
+    id="loginModal"
+    tabindex="-1"
+    aria-labelledby="loginModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="loginForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginModalLabel">Login</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="usernameInput" class="form-label">Username</label>
+              <input
+                type="text"
+                class="form-control"
+                id="usernameInput"
+                placeholder="Enter username"
+                required
+                autocomplete="username"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="passwordInput" class="form-label">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="passwordInput"
+                placeholder="Enter password"
+                required
+                autocomplete="current-password"
+              />
+            </div>
+            <div id="loginError" class="text-danger" role="alert" style="display:none;">
+              Invalid username or password.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Article Detail Modal -->
+  <div
+    class="modal fade"
+    id="articleModal"
+    tabindex="-1"
+    aria-labelledby="articleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="articleModalLabel">Article Title</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            id="articleModalClose"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <img
+            src=""
+            alt=""
+            class="img-fluid rounded mb-3"
+            id="articleModalImage"
+          />
+          <p id="articleModalContent" style="white-space: pre-line; user-select: text;"></p>
+          <div class="d-flex flex-wrap gap-2 mt-3" id="articleModalTags"></div>
+          <hr />
+          <section aria-labelledby="articleCommentsHeading">
+            <h6 id="articleCommentsHeading">Comments</h6>
+            <ul class="list-group mb-3" id="commentList" style="max-height: 200px; overflow-y:auto;"></ul>
+            <form id="commentForm" class="d-flex gap-2">
+              <input
+                type="text"
+                id="commentInput"
+                class="form-control"
+                placeholder="Add a comment"
+                aria-label="Add a comment"
+                required
+              />
+              <button type="submit" class="btn btn-primary">Post</button>
+            </form>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Topic Modal -->
+  <div
+    class="modal fade"
+    id="createTopicModal"
+    tabindex="-1"
+    aria-labelledby="createTopicModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="createTopicForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createTopicModalLabel">Create New Topic</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="topicNameInput" class="form-label">Topic Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="topicNameInput"
+                placeholder="Enter topic name"
+                required
+                maxlength="30"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="topicColorInput" class="form-label">Topic Color</label>
+              <input
+                type="color"
+                class="form-control form-control-color"
+                id="topicColorInput"
+                value="#3f51b5"
+                title="Choose topic color"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary w-100">Create Topic</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Blog Post Modal -->
+  <div
+    class="modal fade"
+    id="createPostModal"
+    tabindex="-1"
+    aria-labelledby="createPostModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <form id="createPostForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createPostModalLabel">Create New Blog Post</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="postTitleInput" class="form-label">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                id="postTitleInput"
+                placeholder="Enter post title"
+                required
+                maxlength="100"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="postTopicSelect" class="form-label">Select Topic</label>
+              <select class="form-select" id="postTopicSelect" required aria-required="true">
+                <!-- Options dynamically populated -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="postContentInput" class="form-label">Content</label>
+              <textarea
+                class="form-control"
+                id="postContentInput"
+                placeholder="Write your blog content here..."
+                rows="8"
+                required
+              ></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="postTagsInput" class="form-label">Tags (comma separated)</label>
+              <input
+                type="text"
+                class="form-control"
+                id="postTagsInput"
+                placeholder="eg. technology, ai, software"
+                maxlength="80"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="postImageUrlInput" class="form-label">Image URL</label>
+              <input
+                type="url"
+                class="form-control"
+                id="postImageUrlInput"
+                placeholder="Image URL or leave blank for placeholder"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary w-100">Publish Post</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button to Add Post -->
+  <button
+    id="fabAddPost"
+    title="Add New Blog Post"
+    aria-label="Add New Blog Post"
+    type="button"
+  >
+    <span class="material-icons">edit</span>
+  </button>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-QG1by5g6AzLcZTqa1heuYlXhjqy6LDZNvbk6JWiHkRQrFvmNCP3ycOjD3phzigZ6"
+    crossorigin="anonymous"
+  ></script>
+  <script>
+    /* Application State */
+    (() => {
+      "use strict";
+
+      // User credential constants (hardcoded)
+      const AUTH_USERNAME = "iamsriramramesh1";
+      const AUTH_PASSWORD = "dEmUkOcHbA";
+
+      // Constants
+      const ITEMS_PER_PAGE = 6;
+      const COMMENT_LIMIT_PER_ARTICLE = 100;
+
+      // Elements
+      const loginModalEl = document.getElementById("loginModal");
+      const loginModal = new bootstrap.Modal(loginModalEl, { keyboard: false });
+      const createTopicModalEl = document.getElementById("createTopicModal");
+      const createTopicModal = new bootstrap.Modal(createTopicModalEl);
+      const createPostModalEl = document.getElementById("createPostModal");
+      const createPostModal = new bootstrap.Modal(createPostModalEl);
+      const articleModalEl = document.getElementById("articleModal");
+      const articleModal = new bootstrap.Modal(articleModalEl);
+
+      const userMenuBtn = document.getElementById("userMenuBtn");
+      const userMenu = document.getElementById("userMenu");
+      const loginMenuItem = document.getElementById("loginMenuItem");
+      const profileMenuItem = document.getElementById("profileMenuItem");
+      const logoutMenuItem = document.getElementById("logoutMenuItem");
+
+      const categoryTabs = document.getElementById("categoryTabs");
+      const categoryList = document.getElementById("categoryList");
+      const trendingList = document.getElementById("trendingList");
+      const articleFeed = document.getElementById("articleFeed");
+      const bookmarksList = document.getElementById("bookmarksList");
+      const readingListEl = document.getElementById("readingList");
+
+      const searchInput = document.getElementById("searchInput");
+
+      const darkModeToggle = document.getElementById("darkModeToggle");
+      const darkModeIcon = document.getElementById("darkModeIcon");
+
+      const fabAddPost = document.getElementById("fabAddPost");
+
+      // Modals forms and fields
+      const loginForm = document.getElementById("loginForm");
+      const usernameInput = document.getElementById("usernameInput");
+      const passwordInput = document.getElementById("passwordInput");
+      const loginError = document.getElementById("loginError");
+
+      const createTopicForm = document.getElementById("createTopicForm");
+      const topicNameInput = document.getElementById("topicNameInput");
+      const topicColorInput = document.getElementById("topicColorInput");
+
+      const createPostForm = document.getElementById("createPostForm");
+      const postTitleInput = document.getElementById("postTitleInput");
+      const postTopicSelect = document.getElementById("postTopicSelect");
+      const postContentInput = document.getElementById("postContentInput");
+      const postTagsInput = document.getElementById("postTagsInput");
+      const postImageUrlInput = document.getElementById("postImageUrlInput");
+
+      const articleModalLabel = document.getElementById("articleModalLabel");
+      const articleModalImage = document.getElementById("articleModalImage");
+      const articleModalContent = document.getElementById("articleModalContent");
+      const articleModalTags = document.getElementById("articleModalTags");
+      const commentList = document.getElementById("commentList");
+      const commentForm = document.getElementById("commentForm");
+      const commentInput = document.getElementById("commentInput");
+
+      // State data
+      let articles = [];
+      let categories = [];
+      let bookmarks = [];
+      let readingList = [];
+      let userPreferences = {
+        theme: "light",
+        fontSize: 16,
+        lineHeight: 1.5,
+        categories: [],
+        notifications: true,
+      };
+      let readingHistory = [];
+      let comments = {}; // {articleId: [{commentId, author, text, date}]}
+      let loggedInUser = null;
+
+      let currentCategoryFilter = "All";
+      let currentPage = 1;
+      let loadingArticles = false;
+      let allArticlesLoaded = false;
+      let currentSearchTerm = "";
+
+      // Utility: generate id
+      function generateId() {
+        return Math.random().toString(36).substr(2, 9);
+      }
+
+      // Save/load state to/from localStorage
+      function saveState() {
+        localStorage.setItem("news_reader_articles", JSON.stringify(articles));
+        localStorage.setItem("news_reader_categories", JSON.stringify(categories));
+        localStorage.setItem("news_reader_bookmarks", JSON.stringify(bookmarks));
+        localStorage.setItem("news_reader_readingList", JSON.stringify(readingList));
+        localStorage.setItem("news_reader_userPreferences", JSON.stringify(userPreferences));
+        localStorage.setItem("news_reader_readingHistory", JSON.stringify(readingHistory));
+        localStorage.setItem("news_reader_comments", JSON.stringify(comments));
+        if (loggedInUser) {
+          localStorage.setItem("news_reader_loggedInUser", JSON.stringify(loggedInUser));
+        } else {
+          localStorage.removeItem("news_reader_loggedInUser");
+        }
+      }
+
+      function loadState() {
+        articles = JSON.parse(localStorage.getItem("news_reader_articles")) || [];
+        categories = JSON.parse(localStorage.getItem("news_reader_categories")) || [];
+        bookmarks = JSON.parse(localStorage.getItem("news_reader_bookmarks")) || [];
+        readingList = JSON.parse(localStorage.getItem("news_reader_readingList")) || [];
+        userPreferences =
+          JSON.parse(localStorage.getItem("news_reader_userPreferences")) || userPreferences;
+        readingHistory = JSON.parse(localStorage.getItem("news_reader_readingHistory")) || [];
+        comments = JSON.parse(localStorage.getItem("news_reader_comments")) || {};
+        loggedInUser = JSON.parse(localStorage.getItem("news_reader_loggedInUser")) || null;
+      }
+
+      // Setup default categories and demo articles if none loaded
+      function setupDemoData() {
+        if (categories.length === 0) {
+          categories = [
+            {
+              id: "cat-tech",
+              name: "Technology",
+              color: "#1e88e5",
+              articleCount: 0,
+              isSubscribed: true,
+            },
+            {
+              id: "cat-health",
+              name: "Health",
+              color: "#43a047",
+              articleCount: 0,
+              isSubscribed: true,
+            },
+            {
+              id: "cat-news",
+              name: "News",
+              color: "#e53935",
+              articleCount: 0,
+              isSubscribed: true,
+            },
+            {
+              id: "cat-sports",
+              name: "Sports",
+              color: "#fb8c00",
+              articleCount: 0,
+              isSubscribed: true,
+            },
+            {
+              id: "cat-entertainment",
+              name: "Entertainment",
+              color: "#8e24aa",
+              articleCount: 0,
+              isSubscribed: true,
+            },
+          ];
+        }
+        if (articles.length === 0) {
+          // Populate demo articles (some sample articles)
+          articles = [
+            {
+              id: generateId(),
+              title: "The Rise of Artificial Intelligence",
+              summary:
+                "Explore how AI is transforming industries and impacting everyday life in the modern world.",
+              content:
+                "Artificial Intelligence (AI) is rapidly evolving and reshaping industries worldwide. From healthcare to finance and entertainment, AI-powered solutions are revolutionizing the way we live and work. This article explores the various applications of AI and discusses the ethical considerations involved.",
+              author: "Sriram Ramesh",
+              source: "TechDaily",
+              publishedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+              category: "Technology",
+              tags: ["AI", "innovation", "technology"],
+              imageUrl:
+                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9b71d294-977e-4dd8-90a3-8486567af87b.png",
+              readTime: 7,
+              views: 1062,
+            },
+            {
+              id: generateId(),
+              title: "10 Tips for a Healthy Lifestyle",
+              summary:
+                "Simple and effective lifestyle changes that lead to better health and wellbeing.",
+              content:
+                "A healthy lifestyle doesn't have to be complicated. This article outlines ten tips to help you improve your diet, increase physical activity, manage stress, and get better sleep, leading to an overall improved quality of life.",
+              author: "Jane Doe",
+              source: "HealthWatch",
+              publishedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+              category: "Health",
+              tags: ["health", "lifestyle", "wellbeing"],
+              imageUrl:
+                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8d01a896-ce2a-4493-990f-3cb61ba536b3.png",
+              readTime: 5,
+              views: 850,
+            },
+            {
+              id: generateId(),
+              title: "Top 5 Football Teams in 2024",
+              summary:
+                "Take a look at the most promising football teams competing this year.",
+              content:
+                "The 2024 football season promises exciting matches with high competition. This detailed analysis highlights the strengths, players, and strategies of the top five teams to watch.",
+              author: "Alex Johnson",
+              source: "SportsWeekly",
+              publishedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+              category: "Sports",
+              tags: ["football", "sports", "2024 season"],
+              imageUrl:
+                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/424c1b06-4e7d-40fb-bcd3-c97983898588.png",
+              readTime: 6,
+              views: 750,
+            },
+            {
+              id: generateId(),
+              title: "New Breakthroughs in Cancer Research",
+              summary:
+                "Scientists reveal new promising treatments and insights in cancer research.",
+              content:
+                "Recent breakthroughs in cancer research bring hope to millions. This article covers the latest studies, treatment approaches, and future directions in oncology.",
+              author: "Dr. Emily Clark",
+              source: "MedNews",
+              publishedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+              category: "Health",
+              tags: ["cancer", "research", "medical"],
+              imageUrl:
+                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c74287d6-4ab9-4425-bee5-c1ec8fbff9f9.png",
+              readTime: 8,
+              views: 420,
+            },
+            {
+              id: generateId(),
+              title: "The Hottest Movies of Summer 2024",
+              summary:
+                "A review of the most anticipated movies hitting theaters this summer.",
+              content:
+                "Summer 2024 is packed with blockbuster films from various genres. From action thrillers to romantic comedies, this article previews the movies that audiences are most excited to see.",
+              author: "Lily Martinez",
+              source: "CinemaBuzz",
+              publishedAt: new Date(Date.now() - 8000000).toISOString(),
+              category: "Entertainment",
+              tags: ["movies", "summer 2024", "blockbusters"],
+              imageUrl:
+                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4c4de0fe-3879-4af0-8613-8e278cebb71e.png",
+              readTime: 6,
+              views: 640,
+            },
+            {
+              id: generateId(),
+              title: "How to Get Started with Machine Learning",
+              summary:
+                "Beginner's guide to understanding and applying machine learning techniques.",
+              content:
+                "Machine learning offers significant opportunities across fields. This beginner's guide covers what you need to know to start learning and applying machine learning in projects.",
+              author: "Sriram Ramesh",
+              source: "TechDaily",
+              publishedAt: new Date(Date.now() - 30000000).toISOString(),
+              category: "Technology",
+              tags: ["machine learning", "AI", "beginners"],
+              imageUrl:
+                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1eff4c4e-1c4b-4228-a469-e1bd3f71fa9f.png",
+              readTime: 7,
+              views: 520,
+            },
+          ];
+        }
+      }
+
+      // Render category tabs (top)
+      function renderCategoryTabs() {
+        categoryTabs.innerHTML = "";
+
+        // Add "All" category filter button
+        const allBtn = document.createElement("button");
+        allBtn.type = "button";
+        allBtn.innerText = "All";
+        allBtn.classList.add("active");
+        if (currentCategoryFilter === "All") allBtn.classList.add("active");
+        allBtn.setAttribute("aria-selected", currentCategoryFilter === "All" ? "true" : "false");
+        allBtn.setAttribute("role", "tab");
+        allBtn.addEventListener("click", () => {
+          currentCategoryFilter = "All";
+          currentPage = 1;
+          allArticlesLoaded = false;
+          clearArticles();
+          renderCategoryTabs();
+          fetchArticles();
+          renderCategoryList();
+        });
+        categoryTabs.appendChild(allBtn);
+
+        // Add each category tab button
+        categories.forEach((cat) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.innerText = cat.name;
+          if (cat.name === currentCategoryFilter) btn.classList.add("active");
+          btn.setAttribute("aria-selected", cat.name === currentCategoryFilter ? "true" : "false");
+          btn.setAttribute("role", "tab");
+          btn.style.backgroundColor = btn.classList.contains("active")
+            ? cat.color
+            : "#e9ecef";
+          btn.style.color = btn.classList.contains("active")
+            ? "#fff"
+            : "#495057";
+          btn.addEventListener("click", () => {
+            currentCategoryFilter = cat.name;
+            currentPage = 1;
+            allArticlesLoaded = false;
+            clearArticles();
+            renderCategoryTabs();
+            fetchArticles();
+            renderCategoryList();
+          });
+          categoryTabs.appendChild(btn);
+        });
+      }
+
+      // Render category list (left sidebar)
+      function renderCategoryList() {
+        categoryList.innerHTML = "";
+        const filteredCategories = categories;
+
+        filteredCategories.forEach((cat) => {
+          const li = document.createElement("li");
+          li.setAttribute("role", "option");
+          li.setAttribute("tabindex", "0");
+          li.classList.toggle("active", cat.name === currentCategoryFilter);
+          li.style.borderLeft = `4px solid ${cat.color}`;
+          li.innerHTML = `
+            <span>${cat.name}</span>
+            <span class="badge bg-secondary rounded-pill">${cat.articleCount}</span>
+          `;
+          li.addEventListener("click", () => {
+            currentCategoryFilter = cat.name;
+            currentPage = 1;
+            allArticlesLoaded = false;
+            clearArticles();
+            renderCategoryTabs();
+            fetchArticles();
+            renderCategoryList();
+          });
+          li.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              li.click();
+            }
+          });
+          categoryList.appendChild(li);
+        });
+      }
+
+      // Render trending topics (left sidebar)
+      function renderTrendingTopics() {
+        trendingList.innerHTML = "";
+        const trendingArticles = [...articles]
+          .sort((a, b) => b.views - a.views)
+          .slice(0, 6);
+
+        trendingArticles.forEach((a) => {
+          const li = document.createElement("li");
+          li.textContent = a.title;
+          li.title = a.summary;
+          li.tabIndex = 0;
+          li.addEventListener("click", () => {
+            openArticleModal(a.id);
+          });
+          li.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              li.click();
+            }
+          });
+          trendingList.appendChild(li);
+        });
+      }
+
+      // Format date as relative time (e.g., "2 days ago")
+      function formatRelativeDate(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffSec = Math.floor((now - date) / 1000);
+
+        if (diffSec < 60) return "Just now";
+        if (diffSec < 3600) return `${Math.floor(diffSec / 60)} mins ago`;
+        if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} hrs ago`;
+        if (diffSec < 2592000) return `${Math.floor(diffSec / 86400)} days ago`;
+        return date.toLocaleDateString();
+      }
+
+      // Clear article feed
+      function clearArticles() {
+        articleFeed.innerHTML = "";
+      }
+
+      // Render bookmarks
+      function renderBookmarks() {
+        bookmarksList.innerHTML = "";
+        if (bookmarks.length === 0) {
+          const empty = document.createElement("li");
+          empty.textContent = "No bookmarks yet.";
+          empty.style.color = "#868e96";
+          bookmarksList.appendChild(empty);
+          return;
+        }
+
+        bookmarks.forEach((bm) => {
+          const article = articles.find((a) => a.id === bm.articleId);
+          if (!article) return;
+          const li = document.createElement("li");
+          li.tabIndex = 0;
+          li.classList.add("d-flex", "justify-content-between", "align-items-center");
+          li.style.fontSize = "0.9rem";
+          li.textContent = article.title;
+          li.title = article.summary;
+          const delBtn = document.createElement("button");
+          delBtn.className = "btn btn-link btn-sm p-0";
+          delBtn.title = "Remove bookmark";
+          delBtn.setAttribute("aria-label", "Remove bookmark");
+          delBtn.innerHTML = '<span class="material-icons text-danger">delete</span>';
+          delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeBookmark(bm.articleId);
+          });
+          li.appendChild(delBtn);
+          li.addEventListener("click", () => openArticleModal(article.id));
+          li.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              li.click();
+            }
+          });
+          bookmarksList.appendChild(li);
+        });
+      }
+
+      // Render reading list
+      function renderReadingList() {
+        readingListEl.innerHTML = "";
+        if (readingList.length === 0) {
+          const empty = document.createElement("li");
+          empty.textContent = "No articles saved for reading.";
+          empty.style.color = "#868e96";
+          readingListEl.appendChild(empty);
+          return;
+        }
+
+        readingList.forEach((item) => {
+          const article = articles.find((a) => a.id === item.articleId);
+          if (!article) return;
+          const li = document.createElement("li");
+          li.tabIndex = 0;
+          li.classList.add("d-flex", "justify-content-between", "align-items-center");
+          li.style.fontSize = "0.9rem";
+          li.textContent = article.title + (item.progress && item.progress > 0 ? ` (${Math.round(item.progress * 100)}%)` : "");
+          li.title = article.summary;
+          const delBtn = document.createElement("button");
+          delBtn.className = "btn btn-link btn-sm p-0";
+          delBtn.title = "Remove from reading list";
+          delBtn.setAttribute("aria-label", "Remove from reading list");
+          delBtn.innerHTML = '<span class="material-icons text-danger">delete</span>';
+          delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeFromReadingList(item.articleId);
+          });
+          li.appendChild(delBtn);
+          li.addEventListener("click", () => openArticleModal(article.id));
+          li.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              li.click();
+            }
+          });
+          readingListEl.appendChild(li);
+        });
+      }
+
+      // Article card template helper
+      function createArticleCard(article) {
+        const card = document.createElement("article");
+        card.classList.add("article-card");
+        card.tabIndex = 0;
+        card.setAttribute("role", "article");
+        card.setAttribute("aria-label", article.title);
+
+        // Image with fade-in effect
+        const img = document.createElement("img");
+        img.className = "card-image";
+        img.alt = `Image for article titled ${article.title}`;
+        img.loading = "lazy";
+        img.src = article.imageUrl || `https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1a502da9-837d-43f3-994e-b447ca4d1e56.png
+        img.style.opacity = "0";
+        img.style.transition = "opacity 0.4s ease";
+        img.onload = () => {
+          img.style.opacity = "1";
+        };
+        card.appendChild(img);
+
+        // Content container
+        const content = document.createElement("div");
+        content.className = "article-content";
+
+        // Title
+        const title = document.createElement("h3");
+        title.className = "article-title";
+        title.textContent = article.title;
+        title.tabIndex = -1;
+        content.appendChild(title);
+
+        // Summary
+        const summary = document.createElement("p");
+        summary.className = "article-summary";
+        summary.textContent = article.summary;
+        content.appendChild(summary);
+
+        // Metadata
+        const meta = document.createElement("div");
+        meta.className = "article-meta";
+
+        const authorSpan = document.createElement("span");
+        authorSpan.innerHTML = `<span class="material-icons" aria-hidden="true">person</span>${article.author}`;
+        meta.appendChild(authorSpan);
+
+        const sourceSpan = document.createElement("span");
+        sourceSpan.innerHTML = `<span class="material-icons" aria-hidden="true">source</span>${article.source}`;
+        meta.appendChild(sourceSpan);
+
+        const dateSpan = document.createElement("span");
+        dateSpan.innerHTML = `<span class="material-icons" aria-hidden="true">calendar_today</span>${formatRelativeDate(article.publishedAt)}`;
+        meta.appendChild(dateSpan);
+
+        const readTimeSpan = document.createElement("span");
+        readTimeSpan.innerHTML = `<span class="material-icons" aria-hidden="true">schedule</span>${article.readTime} min read`;
+        meta.appendChild(readTimeSpan);
+
+        content.appendChild(meta);
+
+        // Tags
+        const tagsContainer = document.createElement("div");
+        tagsContainer.className = "article-tags";
+        article.tags.forEach((tag) => {
+          const tagEl = document.createElement("span");
+          tagEl.className = "article-tag";
+          tagEl.textContent = tag;
+          tagsContainer.appendChild(tagEl);
+        });
+        content.appendChild(tagsContainer);
+
+        // Bookmark button
+        const bookmarkBtn = document.createElement("button");
+        bookmarkBtn.className = "bookmark-btn";
+        bookmarkBtn.title = "Bookmark this article";
+        bookmarkBtn.setAttribute("aria-pressed", "false");
+        bookmarkBtn.innerHTML = '<span class="material-icons">bookmark_border</span>';
+        if (isBookmarked(article.id)) {
+          bookmarkBtn.classList.add("active");
+          bookmarkBtn.setAttribute("aria-pressed", "true");
+          bookmarkBtn.innerHTML = '<span class="material-icons">bookmark</span>';
+        }
+        bookmarkBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleBookmark(article.id, bookmarkBtn);
+        });
+        content.appendChild(bookmarkBtn);
+
+        card.appendChild(content);
+
+        // Click on card opens article modal
+        card.addEventListener("click", () => {
+          openArticleModal(article.id);
+        });
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            card.click();
+          }
+        });
+
+        return card;
+      }
+
+      // Check if bookmarked
+      function isBookmarked(articleId) {
+        return bookmarks.some((bm) => bm.articleId === articleId);
+      }
+
+      // Add/remove bookmark
+      function toggleBookmark(articleId, btn) {
+        if (!loggedInUser) {
+          alert("Please login to bookmark articles.");
+          return;
+        }
+        const index = bookmarks.findIndex((bm) => bm.articleId === articleId);
+        if (index >= 0) {
+          bookmarks.splice(index, 1);
+          btn.classList.remove("active");
+          btn.setAttribute("aria-pressed", "false");
+          btn.innerHTML = '<span class="material-icons">bookmark_border</span>';
+        } else {
+          bookmarks.push({ articleId, folderId: null, bookmarkedAt: new Date().toISOString(), notes: "" });
+          btn.classList.add("active");
+          btn.setAttribute("aria-pressed", "true");
+          btn.innerHTML = '<span class="material-icons">bookmark</span>';
+        }
+        saveState();
+        renderBookmarks();
+      }
+
+      function removeBookmark(articleId) {
+        const index = bookmarks.findIndex((bm) => bm.articleId === articleId);
+        if (index >= 0) {
+          bookmarks.splice(index, 1);
+          saveState();
+          renderBookmarks();
+          // Update bookmark buttons on cards
+          document.querySelectorAll(".article-card").forEach((card) => {
+            const titleEl = card.querySelector(".article-title");
+            if (titleEl) {
+              const article = articles.find((a) => a.title === titleEl.textContent);
+              if (article && article.id === articleId) {
+                const btn = card.querySelector(".bookmark-btn");
+                if (btn) {
+                  btn.classList.remove("active");
+                  btn.setAttribute("aria-pressed", "false");
+                  btn.innerHTML = '<span class="material-icons">bookmark_border</span>';
+                }
+              }
+            }
+          });
+        }
+      }
+
+      // Add/remove reading list
+      function isInReadingList(articleId) {
+        return readingList.some((item) => item.articleId === articleId);
+      }
+      function addToReadingList(articleId) {
+        if (!loggedInUser) {
+          alert("Please login to add articles to reading list.");
+          return;
+        }
+        if (!isInReadingList(articleId)) {
+          readingList.push({ articleId, addedAt: new Date().toISOString(), progress: 0, completedAt: null });
+          saveState();
+          renderReadingList();
+          alert("Added to your reading list.");
+        }
+      }
+      function removeFromReadingList(articleId) {
+        const index = readingList.findIndex((item) => item.articleId === articleId);
+        if (index >= 0) {
+          readingList.splice(index, 1);
+          saveState();
+          renderReadingList();
+        }
+      }
+
+      // Fetch articles for feed with filtering, pagination, and search
+      function fetchArticles() {
+        if (loadingArticles || allArticlesLoaded) return;
+        loadingArticles = true;
+
+        // Show loading spinner at bottom
+        const loader = document.createElement("div");
+        loader.className = "infinite-scroll-loader";
+        loader.textContent = "Loading articles...";
+        articleFeed.appendChild(loader);
+
+        setTimeout(() => {
+          // Filter by category if not 'All'
+          let filtered = articles;
+
+          if (currentCategoryFilter !== "All") {
+            filtered = filtered.filter(
+              (a) => a.category.toLowerCase() === currentCategoryFilter.toLowerCase()
+            );
+          }
+
+          // Search filter
+          const term = currentSearchTerm.trim().toLowerCase();
+          if (term) {
+            filtered = filtered.filter(
+              (a) =>
+                a.title.toLowerCase().includes(term) ||
+                a.summary.toLowerCase().includes(term) ||
+                a.tags.some((t) => t.toLowerCase().includes(term))
+            );
+          }
+
+          // Pagination
+          const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+          const pageItems = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+          // Append articles to feed or mark end
+          if (pageItems.length === 0) {
+            allArticlesLoaded = true;
+            if (currentPage === 1) {
+              // No articles found
+              articleFeed.innerHTML = '<p class="text-muted">No articles found.</p>';
+            }
+          } else {
+            pageItems.forEach((art) => {
+              articleFeed.appendChild(createArticleCard(art));
+            });
+            currentPage += 1;
+          }
+
+          loadingArticles = false;
+          loader.remove();
+        }, 600);
+      }
+
+      // Clear and reload articles (for new filter/search)
+      function reloadArticles() {
+        currentPage = 1;
+        allArticlesLoaded = false;
+        clearArticles();
+        fetchArticles();
+      }
+
+      // Open article modal and show full content
+      let currentArticleId = null;
+      function openArticleModal(articleId) {
+        currentArticleId = articleId;
+        const art = articles.find((a) => a.id === articleId);
+        if (!art) return;
+
+        articleModalLabel.textContent = art.title;
+        articleModalImage.src = art.imageUrl || `https://placehold.co/800x400/0891b2/ffffff?text=No+Image`;
+        articleModalImage.alt = `Image for article titled ${art.title}`;
+        articleModalContent.textContent = art.content;
+
+        articleModalTags.innerHTML = "";
+        art.tags.forEach((tag) => {
+          const tagEl = document.createElement("span");
+          tagEl.className = "article-tag";
+          tagEl.textContent = tag;
+          articleModalTags.appendChild(tagEl);
+        });
+
+        renderComments(articleId);
+
+        articleModal.show();
+      }
+
+      // Render comments for article modal
+      function renderComments(articleId) {
+        commentList.innerHTML = "";
+        const articleComments = comments[articleId] || [];
+        if (articleComments.length === 0) {
+          const li = document.createElement("li");
+          li.textContent = "No comments yet. Be the first!";
+          li.className = "list-group-item text-muted";
+          commentList.appendChild(li);
+          return;
+        }
+
+        articleComments.forEach((c) => {
+          const li = document.createElement("li");
+          li.className = "list-group-item";
+          li.tabIndex = 0;
+          li.textContent = `${c.author}: ${c.text}`;
+          commentList.appendChild(li);
+        });
+      }
+
+      // Add comment handler
+      commentForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (!loggedInUser) {
+          alert("Please login to post comments.");
+          return;
+        }
+        const text = commentInput.value.trim();
+        if (!text) return;
+        const newComment = {
+          commentId: generateId(),
+          author: loggedInUser.username,
+          text,
+          date: new Date().toISOString(),
+        };
+        if (!comments[currentArticleId]) comments[currentArticleId] = [];
+        comments[currentArticleId].push(newComment);
+        if (comments[currentArticleId].length > COMMENT_LIMIT_PER_ARTICLE) {
+          comments[currentArticleId].shift();
+        }
+        saveState();
+        renderComments(currentArticleId);
+        commentInput.value = "";
+      });
+
+      // User menu toggle
+      userMenuBtn.addEventListener("click", () => {
+        userMenu.classList.toggle("show");
+      });
+
+      // Hide user menu on outside click or escape
+      document.addEventListener("click", (event) => {
+        if (!userMenu.contains(event.target) && event.target !== userMenuBtn) {
+          userMenu.classList.remove("show");
+        }
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          userMenu.classList.remove("show");
+        }
+      });
+
+      // Login menu item click
+      loginMenuItem.addEventListener("click", (e) => {
+        e.preventDefault();
+        userMenu.classList.remove("show");
+        loginModal.show();
+      });
+
+      // Logout menu item click
+      logoutMenuItem.addEventListener("click", () => {
+        loggedInUser = null;
+        updateUserMenu();
+        loginModal.hide();
+        fabAddPost.style.display = "none";
+        saveState();
+      });
+
+      // Profile menu item click - opens create topic modal (as simple profile action for demo)
+      profileMenuItem.addEventListener("click", () => {
+        userMenu.classList.remove("show");
+        createTopicModal.show();
+      });
+
+      // Login form submit
+      loginForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+
+        if (
+          username === AUTH_USERNAME &&
+          password === AUTH_PASSWORD
+        ) {
+          loggedInUser = { username: username };
+          loginError.style.display = "none";
+          loginModal.hide();
+          usernameInput.value = "";
+          passwordInput.value = "";
+          showWelcomeNotification();
+          updateUserMenu();
+          fabAddPost.style.display = "flex";
+          saveState();
+        } else {
+          loginError.style.display = "block";
+        }
+      });
+
+      // Update user menu UI based on logged in state
+      function updateUserMenu() {
+        if (loggedInUser) {
+          loginMenuItem.style.display = "none";
+          profileMenuItem.style.display = "block";
+          logoutMenuItem.style.display = "block";
+          userMenuBtn.title = `User menu for ${loggedInUser.username}`;
+        } else {
+          loginMenuItem.style.display = "block";
+          profileMenuItem.style.display = "none";
+          logoutMenuItem.style.display = "none";
+          userMenuBtn.title = "User menu - please login";
+        }
+      }
+
+      // Show a welcome toast or alert
+      function showWelcomeNotification() {
+        alert(`Welcome, ${loggedInUser.username}! You are now logged in.`);
+      }
+
+      // Create Topic form submit
+      createTopicForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = topicNameInput.value.trim();
+        const color = topicColorInput.value || "#3f51b5";
+
+        if (categories.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+          alert("Topic name must be unique.");
+          return;
+        }
+
+        const newCategory = {
+          id: "cat-" + generateId(),
+          name,
+          color,
+          articleCount: 0,
+          isSubscribed: true,
+        };
+        categories.push(newCategory);
+        saveState();
+        renderCategoryTabs();
+        renderCategoryList();
+        updatePostTopicOptions();
+        createTopicModal.hide();
+        topicNameInput.value = "";
+        topicColorInput.value = "#3f51b5";
+      });
+
+      // Update post topic <select> options with current categories
+      function updatePostTopicOptions() {
+        postTopicSelect.innerHTML = "";
+        categories.forEach((c) => {
+          const option = document.createElement("option");
+          option.value = c.id;
+          option.textContent = c.name;
+          postTopicSelect.appendChild(option);
+        });
+      }
+
+      // Create Post form submit
+      createPostForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const title = postTitleInput.value.trim();
+        const topicId = postTopicSelect.value;
+        const content = postContentInput.value.trim();
+        const tagsRaw = postTagsInput.value.trim();
+        const imageUrl = postImageUrlInput.value.trim() || `https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/2416aea0-0460-4fd2-832c-004277a43ee9.png
+
+        if (!title || !topicId || !content) {
+          alert("Please fill all required fields.");
+          return;
+        }
+
+        const category = categories.find((c) => c.id === topicId);
+        if (!category) {
+          alert("Invalid topic selected.");
+          return;
+        }
+
+        const newArticle = {
+          id: generateId(),
+          title,
+          summary: content.length > 140 ? content.substr(0, 140) + "…" : content,
+          content,
+          author: loggedInUser.username,
+          source: "User Blog",
+          publishedAt: new Date().toISOString(),
+          category: category.name,
+          tags: tagsRaw ? tagsRaw.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean) : [],
+          imageUrl,
+          readTime: Math.max(3, Math.round(content.length / 300)), // Rough estimate: 300 chars ~ 1 min
+          views: 0,
+        };
+        articles.unshift(newArticle);
+
+        // Increment category article count
+        const catIndex = categories.findIndex((c) => c.id === topicId);
+        if (catIndex >= 0) {
+          categories[catIndex].articleCount++;
+        }
+
+        saveState();
+        renderCategoryTabs();
+        renderCategoryList();
+        reloadArticles();
+        createPostModal.hide();
+
+        // Clear form fields
+        postTitleInput.value = "";
+        postTopicSelect.selectedIndex = 0;
+        postContentInput.value = "";
+        postTagsInput.value = "";
+        postImageUrlInput.value = "";
+      });
+
+      // Dark mode toggle
+      darkModeToggle.addEventListener("click", () => {
+        if (document.documentElement.getAttribute("data-theme") === "dark") {
+          document.documentElement.removeAttribute("data-theme");
+          userPreferences.theme = "light";
+          darkModeIcon.textContent = "dark_mode";
+        } else {
+          document.documentElement.setAttribute("data-theme", "dark");
+          userPreferences.theme = "dark";
+          darkModeIcon.textContent = "light_mode";
+        }
+        saveState();
+      });
+
+      // Search input
+      searchInput.addEventListener("input", () => {
+        const val = searchInput.value.trim();
+        currentSearchTerm = val;
+        currentPage = 1;
+        allArticlesLoaded = false;
+        clearArticles();
+        fetchArticles();
+      });
+
+      // Infinite scroll loading for article feed
+      articleFeed.addEventListener("scroll", () => {
+        if (
+          articleFeed.scrollTop + articleFeed.clientHeight >=
+          articleFeed.scrollHeight - 60
+        ) {
+          fetchArticles();
+        }
+      });
+
+      // Show floating add post button only when user logged in
+      function updateFabVisibility() {
+        if (loggedInUser) {
+          fabAddPost.style.display = "flex";
+        } else {
+          fabAddPost.style.display = "none";
+        }
+      }
+      fabAddPost.addEventListener("click", () => {
+        createPostModal.show();
+      });
+
+      // Open New Topic modal from a prompt on header? For demo: open from user profile menu
+
+      // Initialize app
+      function init() {
+        loadState();
+
+        // Apply theme from prefs
+        if (userPreferences.theme === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+          darkModeIcon.textContent = "light_mode";
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+          darkModeIcon.textContent = "dark_mode";
+        }
+
+        // Setup sample/demo data if needed
+        setupDemoData();
+
+        renderCategoryTabs();
+        renderCategoryList();
+        renderTrendingTopics();
+        renderBookmarks();
+        renderReadingList();
+        updateUserMenu();
+        updatePostTopicOptions();
+        updateFabVisibility();
+
+        // Start loading first articles
+        reloadArticles();
+      }
+
+      init();
+
+      // Accessibility enhancements: close modals on escape key globally
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.key === "Escape" &&
+          (loginModalEl.classList.contains("show") ||
+            createTopicModalEl.classList.contains("show") ||
+            createPostModalEl.classList.contains("show") ||
+            articleModalEl.classList.contains("show"))
+        ) {
+          bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
