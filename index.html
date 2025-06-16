@@ -8,7 +8,6 @@
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     rel="stylesheet"
-    integrity="sha384-ENjdO4Dr2bkBIFxQpeo9Fj3LY4Yh75vZ5LqT9pGNUQZ6eGZI3G7jcFjMz/3Q9ct"
     crossorigin="anonymous"
   />
   <!-- Material Icons -->
@@ -17,7 +16,6 @@
     rel="stylesheet"
   />
   <style>
-    /* Root color variables for light and dark mode */
     :root {
       --bs-body-bg: #ffffff;
       --bs-body-color: #212529;
@@ -49,7 +47,6 @@
       --btn-primary-hover-bg: #2f66c1;
       --btn-primary-color: #fff;
     }
-
     body {
       background-color: var(--bs-body-bg);
       color: var(--bs-body-color);
@@ -141,7 +138,6 @@
     #categoryTabs button:hover:not(.active) {
       background: #dee2e6;
     }
-
     /* Layout grid */
     .app-container {
       max-width: 1200px;
@@ -449,14 +445,6 @@
     .scrollable {
       overflow-y: auto;
     }
-    /* Topic creation form */
-    .topic-creator {
-      margin-bottom: 1rem;
-    }
-    /* Blog post creation form */
-    .blog-post-creator {
-      margin-bottom: 1rem;
-    }
     /* Floating action button */
     #fabAddPost {
       position: fixed;
@@ -491,33 +479,6 @@
     }
     #darkModeToggle:hover {
       color: var(--btn-primary-bg);
-    }
-    /* Font size toggle */
-    #fontSizeControl {
-      user-select: none;
-      font-size: 1rem;
-    }
-    /* Reading progress ring */
-    .reading-progress-ring {
-      position: relative;
-      width: 36px;
-      height: 36px;
-    }
-    svg.progress-ring-circle {
-      transform: rotate(-90deg);
-      overflow: visible;
-    }
-    circle.progress-ring-bg {
-      fill: transparent;
-      stroke: #e6e6e6;
-      stroke-width: 4;
-    }
-    circle.progress-ring {
-      fill: transparent;
-      stroke: var(--btn-primary-bg);
-      stroke-width: 4;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 0.25s ease;
     }
   </style>
 </head>
@@ -573,7 +534,7 @@
             </button>
             <div class="user-menu" id="userMenu" role="menu" aria-labelledby="userMenuBtn" tabindex="-1">
               <a href="#" id="loginMenuItem" role="menuitem">Login</a>
-              <a href="#" id="profileMenuItem" role="menuitem" style="display:none;">Profile</a>
+              <a href="#" id="profileMenuItem" role="menuitem" style="display:none;">Create Topic</a>
               <button id="logoutMenuItem" role="menuitem" style="display:none;">Logout</button>
             </div>
           </li>
@@ -858,23 +819,18 @@
   <!-- Bootstrap JS Bundle with Popper -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-QG1by5g6AzLcZTqa1heuYlXhjqy6LDZNvbk6JWiHkRQrFvmNCP3ycOjD3phzigZ6"
     crossorigin="anonymous"
   ></script>
   <script>
-    /* Application State */
     (() => {
       "use strict";
 
-      // User credential constants (hardcoded)
       const AUTH_USERNAME = "iamsriramramesh1";
       const AUTH_PASSWORD = "dEmUkOcHbA";
-
-      // Constants
       const ITEMS_PER_PAGE = 6;
       const COMMENT_LIMIT_PER_ARTICLE = 100;
 
-      // Elements
+      // DOM Elements
       const loginModalEl = document.getElementById("loginModal");
       const loginModal = new bootstrap.Modal(loginModalEl, { keyboard: false });
       const createTopicModalEl = document.getElementById("createTopicModal");
@@ -904,7 +860,6 @@
 
       const fabAddPost = document.getElementById("fabAddPost");
 
-      // Modals forms and fields
       const loginForm = document.getElementById("loginForm");
       const usernameInput = document.getElementById("usernameInput");
       const passwordInput = document.getElementById("passwordInput");
@@ -929,7 +884,6 @@
       const commentForm = document.getElementById("commentForm");
       const commentInput = document.getElementById("commentInput");
 
-      // State data
       let articles = [];
       let categories = [];
       let bookmarks = [];
@@ -942,7 +896,7 @@
         notifications: true,
       };
       let readingHistory = [];
-      let comments = {}; // {articleId: [{commentId, author, text, date}]}
+      let comments = {};
       let loggedInUser = null;
 
       let currentCategoryFilter = "All";
@@ -951,12 +905,10 @@
       let allArticlesLoaded = false;
       let currentSearchTerm = "";
 
-      // Utility: generate id
       function generateId() {
-        return Math.random().toString(36).substr(2, 9);
+        return Math.random().toString(36).substring(2, 9);
       }
 
-      // Save/load state to/from localStorage
       function saveState() {
         localStorage.setItem("news_reader_articles", JSON.stringify(articles));
         localStorage.setItem("news_reader_categories", JSON.stringify(categories));
@@ -984,149 +936,99 @@
         loggedInUser = JSON.parse(localStorage.getItem("news_reader_loggedInUser")) || null;
       }
 
-      // Setup default categories and demo articles if none loaded
       function setupDemoData() {
         if (categories.length === 0) {
           categories = [
-            {
-              id: "cat-tech",
-              name: "Technology",
-              color: "#1e88e5",
-              articleCount: 0,
-              isSubscribed: true,
-            },
-            {
-              id: "cat-health",
-              name: "Health",
-              color: "#43a047",
-              articleCount: 0,
-              isSubscribed: true,
-            },
-            {
-              id: "cat-news",
-              name: "News",
-              color: "#e53935",
-              articleCount: 0,
-              isSubscribed: true,
-            },
-            {
-              id: "cat-sports",
-              name: "Sports",
-              color: "#fb8c00",
-              articleCount: 0,
-              isSubscribed: true,
-            },
-            {
-              id: "cat-entertainment",
-              name: "Entertainment",
-              color: "#8e24aa",
-              articleCount: 0,
-              isSubscribed: true,
-            },
+            { id: "cat-tech", name: "Technology", color: "#1e88e5", articleCount: 0, isSubscribed: true },
+            { id: "cat-health", name: "Health", color: "#43a047", articleCount: 0, isSubscribed: true },
+            { id: "cat-news", name: "News", color: "#e53935", articleCount: 0, isSubscribed: true },
+            { id: "cat-sports", name: "Sports", color: "#fb8c00", articleCount: 0, isSubscribed: true },
+            { id: "cat-entertainment", name: "Entertainment", color: "#8e24aa", articleCount: 0, isSubscribed: true },
           ];
         }
         if (articles.length === 0) {
-          // Populate demo articles (some sample articles)
           articles = [
             {
               id: generateId(),
               title: "The Rise of Artificial Intelligence",
-              summary:
-                "Explore how AI is transforming industries and impacting everyday life in the modern world.",
-              content:
-                "Artificial Intelligence (AI) is rapidly evolving and reshaping industries worldwide. From healthcare to finance and entertainment, AI-powered solutions are revolutionizing the way we live and work. This article explores the various applications of AI and discusses the ethical considerations involved.",
+              summary: "Explore how AI is transforming industries and impacting everyday life in the modern world.",
+              content: "Artificial Intelligence (AI) is rapidly evolving and reshaping industries worldwide. From healthcare to finance and entertainment, AI-powered solutions are revolutionizing the way we live and work. This article explores the various applications of AI and discusses the ethical considerations involved.",
               author: "Sriram Ramesh",
               source: "TechDaily",
               publishedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
               category: "Technology",
               tags: ["AI", "innovation", "technology"],
-              imageUrl:
-                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9b71d294-977e-4dd8-90a3-8486567af87b.png",
+              imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/77efc215-72b7-4d33-99b1-e8a4ea7aa250.png",
               readTime: 7,
               views: 1062,
             },
             {
               id: generateId(),
               title: "10 Tips for a Healthy Lifestyle",
-              summary:
-                "Simple and effective lifestyle changes that lead to better health and wellbeing.",
-              content:
-                "A healthy lifestyle doesn't have to be complicated. This article outlines ten tips to help you improve your diet, increase physical activity, manage stress, and get better sleep, leading to an overall improved quality of life.",
+              summary: "Simple and effective lifestyle changes that lead to better health and wellbeing.",
+              content: "A healthy lifestyle doesn't have to be complicated. This article outlines ten tips to help you improve your diet, increase physical activity, manage stress, and get better sleep, leading to an overall improved quality of life.",
               author: "Jane Doe",
               source: "HealthWatch",
               publishedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
               category: "Health",
               tags: ["health", "lifestyle", "wellbeing"],
-              imageUrl:
-                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8d01a896-ce2a-4493-990f-3cb61ba536b3.png",
+              imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/107006a1-bfd5-40aa-907d-5e8a6788d751.png",
               readTime: 5,
               views: 850,
             },
             {
               id: generateId(),
               title: "Top 5 Football Teams in 2024",
-              summary:
-                "Take a look at the most promising football teams competing this year.",
-              content:
-                "The 2024 football season promises exciting matches with high competition. This detailed analysis highlights the strengths, players, and strategies of the top five teams to watch.",
+              summary: "Take a look at the most promising football teams competing this year.",
+              content: "The 2024 football season promises exciting matches with high competition. This detailed analysis highlights the strengths, players, and strategies of the top five teams to watch.",
               author: "Alex Johnson",
               source: "SportsWeekly",
               publishedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
               category: "Sports",
               tags: ["football", "sports", "2024 season"],
-              imageUrl:
-                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/424c1b06-4e7d-40fb-bcd3-c97983898588.png",
+              imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/78cf3050-c504-4e7f-8787-ece5a527a5a3.png",
               readTime: 6,
               views: 750,
             },
             {
               id: generateId(),
               title: "New Breakthroughs in Cancer Research",
-              summary:
-                "Scientists reveal new promising treatments and insights in cancer research.",
-              content:
-                "Recent breakthroughs in cancer research bring hope to millions. This article covers the latest studies, treatment approaches, and future directions in oncology.",
+              summary: "Scientists reveal new promising treatments and insights in cancer research.",
+              content: "Recent breakthroughs in cancer research bring hope to millions. This article covers the latest studies, treatment approaches, and future directions in oncology.",
               author: "Dr. Emily Clark",
               source: "MedNews",
               publishedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
               category: "Health",
               tags: ["cancer", "research", "medical"],
-              imageUrl:
-                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c74287d6-4ab9-4425-bee5-c1ec8fbff9f9.png",
+              imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4716d3ac-70ea-41a4-a00c-41b88db209e4.png",
               readTime: 8,
               views: 420,
             },
             {
               id: generateId(),
               title: "The Hottest Movies of Summer 2024",
-              summary:
-                "A review of the most anticipated movies hitting theaters this summer.",
-              content:
-                "Summer 2024 is packed with blockbuster films from various genres. From action thrillers to romantic comedies, this article previews the movies that audiences are most excited to see.",
+              summary: "A review of the most anticipated movies hitting theaters this summer.",
+              content: "Summer 2024 is packed with blockbuster films from various genres. From action thrillers to romantic comedies, this article previews the movies that audiences are most excited to see.",
               author: "Lily Martinez",
               source: "CinemaBuzz",
               publishedAt: new Date(Date.now() - 8000000).toISOString(),
               category: "Entertainment",
               tags: ["movies", "summer 2024", "blockbusters"],
-              imageUrl:
-                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4c4de0fe-3879-4af0-8613-8e278cebb71e.png",
+              imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5d2e4a24-64ed-4356-b337-03b9a1535ab9.png",
               readTime: 6,
               views: 640,
             },
             {
               id: generateId(),
               title: "How to Get Started with Machine Learning",
-              summary:
-                "Beginner's guide to understanding and applying machine learning techniques.",
-              content:
-                "Machine learning offers significant opportunities across fields. This beginner's guide covers what you need to know to start learning and applying machine learning in projects.",
+              summary: "Beginner's guide to understanding and applying machine learning techniques.",
+              content: "Machine learning offers significant opportunities across fields. This beginner's guide covers what you need to know to start learning and applying machine learning in projects.",
               author: "Sriram Ramesh",
               source: "TechDaily",
               publishedAt: new Date(Date.now() - 30000000).toISOString(),
               category: "Technology",
               tags: ["machine learning", "AI", "beginners"],
-              imageUrl:
-                "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1eff4c4e-1c4b-4228-a469-e1bd3f71fa9f.png",
+              imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c72e3c53-6d7a-4e09-bc85-b43bb8503505.png",
               readTime: 7,
               views: 520,
             },
@@ -1134,15 +1036,30 @@
         }
       }
 
-      // Render category tabs (top)
+      function formatRelativeDate(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffSec = Math.floor((now - date) / 1000);
+        if (diffSec < 60) return "Just now";
+        if (diffSec < 3600) return `${Math.floor(diffSec / 60)} mins ago`;
+        if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} hrs ago`;
+        if (diffSec < 2592000) return `${Math.floor(diffSec / 86400)} days ago`;
+        return date.toLocaleDateString();
+      }
+
+      function clearArticles() {
+        articleFeed.innerHTML = "";
+      }
+
+      function isBookmarked(articleId) {
+        return bookmarks.some(bm => bm.articleId === articleId);
+      }
+
       function renderCategoryTabs() {
         categoryTabs.innerHTML = "";
-
-        // Add "All" category filter button
         const allBtn = document.createElement("button");
         allBtn.type = "button";
         allBtn.innerText = "All";
-        allBtn.classList.add("active");
         if (currentCategoryFilter === "All") allBtn.classList.add("active");
         allBtn.setAttribute("aria-selected", currentCategoryFilter === "All" ? "true" : "false");
         allBtn.setAttribute("role", "tab");
@@ -1157,20 +1074,15 @@
         });
         categoryTabs.appendChild(allBtn);
 
-        // Add each category tab button
-        categories.forEach((cat) => {
+        categories.forEach(cat => {
           const btn = document.createElement("button");
           btn.type = "button";
           btn.innerText = cat.name;
           if (cat.name === currentCategoryFilter) btn.classList.add("active");
           btn.setAttribute("aria-selected", cat.name === currentCategoryFilter ? "true" : "false");
           btn.setAttribute("role", "tab");
-          btn.style.backgroundColor = btn.classList.contains("active")
-            ? cat.color
-            : "#e9ecef";
-          btn.style.color = btn.classList.contains("active")
-            ? "#fff"
-            : "#495057";
+          btn.style.backgroundColor = btn.classList.contains("active") ? cat.color : "#e9ecef";
+          btn.style.color = btn.classList.contains("active") ? "#fff" : "#495057";
           btn.addEventListener("click", () => {
             currentCategoryFilter = cat.name;
             currentPage = 1;
@@ -1184,12 +1096,9 @@
         });
       }
 
-      // Render category list (left sidebar)
       function renderCategoryList() {
         categoryList.innerHTML = "";
-        const filteredCategories = categories;
-
-        filteredCategories.forEach((cat) => {
+        categories.forEach(cat => {
           const li = document.createElement("li");
           li.setAttribute("role", "option");
           li.setAttribute("tabindex", "0");
@@ -1208,7 +1117,7 @@
             fetchArticles();
             renderCategoryList();
           });
-          li.addEventListener("keydown", (e) => {
+          li.addEventListener("keydown", e => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               li.click();
@@ -1218,14 +1127,10 @@
         });
       }
 
-      // Render trending topics (left sidebar)
       function renderTrendingTopics() {
         trendingList.innerHTML = "";
-        const trendingArticles = [...articles]
-          .sort((a, b) => b.views - a.views)
-          .slice(0, 6);
-
-        trendingArticles.forEach((a) => {
+        const trendingArticles = [...articles].sort((a, b) => b.views - a.views).slice(0, 6);
+        trendingArticles.forEach(a => {
           const li = document.createElement("li");
           li.textContent = a.title;
           li.title = a.summary;
@@ -1233,7 +1138,7 @@
           li.addEventListener("click", () => {
             openArticleModal(a.id);
           });
-          li.addEventListener("keydown", (e) => {
+          li.addEventListener("keydown", e => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               li.click();
@@ -1243,25 +1148,6 @@
         });
       }
 
-      // Format date as relative time (e.g., "2 days ago")
-      function formatRelativeDate(dateStr) {
-        const date = new Date(dateStr);
-        const now = new Date();
-        const diffSec = Math.floor((now - date) / 1000);
-
-        if (diffSec < 60) return "Just now";
-        if (diffSec < 3600) return `${Math.floor(diffSec / 60)} mins ago`;
-        if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} hrs ago`;
-        if (diffSec < 2592000) return `${Math.floor(diffSec / 86400)} days ago`;
-        return date.toLocaleDateString();
-      }
-
-      // Clear article feed
-      function clearArticles() {
-        articleFeed.innerHTML = "";
-      }
-
-      // Render bookmarks
       function renderBookmarks() {
         bookmarksList.innerHTML = "";
         if (bookmarks.length === 0) {
@@ -1271,9 +1157,8 @@
           bookmarksList.appendChild(empty);
           return;
         }
-
-        bookmarks.forEach((bm) => {
-          const article = articles.find((a) => a.id === bm.articleId);
+        bookmarks.forEach(bm => {
+          const article = articles.find(a => a.id === bm.articleId);
           if (!article) return;
           const li = document.createElement("li");
           li.tabIndex = 0;
@@ -1286,13 +1171,13 @@
           delBtn.title = "Remove bookmark";
           delBtn.setAttribute("aria-label", "Remove bookmark");
           delBtn.innerHTML = '<span class="material-icons text-danger">delete</span>';
-          delBtn.addEventListener("click", (e) => {
+          delBtn.addEventListener("click", e => {
             e.stopPropagation();
             removeBookmark(bm.articleId);
           });
           li.appendChild(delBtn);
           li.addEventListener("click", () => openArticleModal(article.id));
-          li.addEventListener("keydown", (e) => {
+          li.addEventListener("keydown", e => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               li.click();
@@ -1302,7 +1187,6 @@
         });
       }
 
-      // Render reading list
       function renderReadingList() {
         readingListEl.innerHTML = "";
         if (readingList.length === 0) {
@@ -1312,28 +1196,28 @@
           readingListEl.appendChild(empty);
           return;
         }
-
-        readingList.forEach((item) => {
-          const article = articles.find((a) => a.id === item.articleId);
+        readingList.forEach(item => {
+          const article = articles.find(a => a.id === item.articleId);
           if (!article) return;
           const li = document.createElement("li");
           li.tabIndex = 0;
           li.classList.add("d-flex", "justify-content-between", "align-items-center");
           li.style.fontSize = "0.9rem";
-          li.textContent = article.title + (item.progress && item.progress > 0 ? ` (${Math.round(item.progress * 100)}%)` : "");
+          const progressText = item.progress && item.progress > 0 ? ` (${Math.round(item.progress * 100)}%)` : "";
+          li.textContent = article.title + progressText;
           li.title = article.summary;
           const delBtn = document.createElement("button");
           delBtn.className = "btn btn-link btn-sm p-0";
           delBtn.title = "Remove from reading list";
           delBtn.setAttribute("aria-label", "Remove from reading list");
           delBtn.innerHTML = '<span class="material-icons text-danger">delete</span>';
-          delBtn.addEventListener("click", (e) => {
+          delBtn.addEventListener("click", e => {
             e.stopPropagation();
             removeFromReadingList(item.articleId);
           });
           li.appendChild(delBtn);
           li.addEventListener("click", () => openArticleModal(article.id));
-          li.addEventListener("keydown", (e) => {
+          li.addEventListener("keydown", e => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               li.click();
@@ -1343,7 +1227,6 @@
         });
       }
 
-      // Article card template helper
       function createArticleCard(article) {
         const card = document.createElement("article");
         card.classList.add("article-card");
@@ -1351,12 +1234,11 @@
         card.setAttribute("role", "article");
         card.setAttribute("aria-label", article.title);
 
-        // Image with fade-in effect
         const img = document.createElement("img");
         img.className = "card-image";
         img.alt = `Image for article titled ${article.title}`;
         img.loading = "lazy";
-        img.src = article.imageUrl || `https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1a502da9-837d-43f3-994e-b447ca4d1e56.png
+        img.src = article.imageUrl || `https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b458ff45-22c4-41df-8bd9-c99b39422a16.png
         img.style.opacity = "0";
         img.style.transition = "opacity 0.4s ease";
         img.onload = () => {
@@ -1364,24 +1246,20 @@
         };
         card.appendChild(img);
 
-        // Content container
         const content = document.createElement("div");
         content.className = "article-content";
 
-        // Title
         const title = document.createElement("h3");
         title.className = "article-title";
         title.textContent = article.title;
         title.tabIndex = -1;
         content.appendChild(title);
 
-        // Summary
         const summary = document.createElement("p");
         summary.className = "article-summary";
         summary.textContent = article.summary;
         content.appendChild(summary);
 
-        // Metadata
         const meta = document.createElement("div");
         meta.className = "article-meta";
 
@@ -1403,10 +1281,9 @@
 
         content.appendChild(meta);
 
-        // Tags
         const tagsContainer = document.createElement("div");
         tagsContainer.className = "article-tags";
-        article.tags.forEach((tag) => {
+        article.tags.forEach(tag => {
           const tagEl = document.createElement("span");
           tagEl.className = "article-tag";
           tagEl.textContent = tag;
@@ -1414,7 +1291,6 @@
         });
         content.appendChild(tagsContainer);
 
-        // Bookmark button
         const bookmarkBtn = document.createElement("button");
         bookmarkBtn.className = "bookmark-btn";
         bookmarkBtn.title = "Bookmark this article";
@@ -1425,7 +1301,7 @@
           bookmarkBtn.setAttribute("aria-pressed", "true");
           bookmarkBtn.innerHTML = '<span class="material-icons">bookmark</span>';
         }
-        bookmarkBtn.addEventListener("click", (e) => {
+        bookmarkBtn.addEventListener("click", e => {
           e.stopPropagation();
           toggleBookmark(article.id, bookmarkBtn);
         });
@@ -1433,11 +1309,10 @@
 
         card.appendChild(content);
 
-        // Click on card opens article modal
         card.addEventListener("click", () => {
           openArticleModal(article.id);
         });
-        card.addEventListener("keydown", (e) => {
+        card.addEventListener("keydown", e => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             card.click();
@@ -1447,18 +1322,12 @@
         return card;
       }
 
-      // Check if bookmarked
-      function isBookmarked(articleId) {
-        return bookmarks.some((bm) => bm.articleId === articleId);
-      }
-
-      // Add/remove bookmark
       function toggleBookmark(articleId, btn) {
         if (!loggedInUser) {
           alert("Please login to bookmark articles.");
           return;
         }
-        const index = bookmarks.findIndex((bm) => bm.articleId === articleId);
+        const index = bookmarks.findIndex(bm => bm.articleId === articleId);
         if (index >= 0) {
           bookmarks.splice(index, 1);
           btn.classList.remove("active");
@@ -1475,16 +1344,16 @@
       }
 
       function removeBookmark(articleId) {
-        const index = bookmarks.findIndex((bm) => bm.articleId === articleId);
+        const index = bookmarks.findIndex(bm => bm.articleId === articleId);
         if (index >= 0) {
           bookmarks.splice(index, 1);
           saveState();
           renderBookmarks();
-          // Update bookmark buttons on cards
-          document.querySelectorAll(".article-card").forEach((card) => {
+          // Update card buttons
+          document.querySelectorAll(".article-card").forEach(card => {
             const titleEl = card.querySelector(".article-title");
             if (titleEl) {
-              const article = articles.find((a) => a.title === titleEl.textContent);
+              const article = articles.find(a => a.title === titleEl.textContent);
               if (article && article.id === articleId) {
                 const btn = card.querySelector(".bookmark-btn");
                 if (btn) {
@@ -1498,9 +1367,8 @@
         }
       }
 
-      // Add/remove reading list
       function isInReadingList(articleId) {
-        return readingList.some((item) => item.articleId === articleId);
+        return readingList.some(item => item.articleId === articleId);
       }
       function addToReadingList(articleId) {
         if (!loggedInUser) {
@@ -1515,7 +1383,7 @@
         }
       }
       function removeFromReadingList(articleId) {
-        const index = readingList.findIndex((item) => item.articleId === articleId);
+        const index = readingList.findIndex(item => item.articleId === articleId);
         if (index >= 0) {
           readingList.splice(index, 1);
           saveState();
@@ -1523,62 +1391,50 @@
         }
       }
 
-      // Fetch articles for feed with filtering, pagination, and search
       function fetchArticles() {
         if (loadingArticles || allArticlesLoaded) return;
         loadingArticles = true;
 
-        // Show loading spinner at bottom
         const loader = document.createElement("div");
         loader.className = "infinite-scroll-loader";
         loader.textContent = "Loading articles...";
         articleFeed.appendChild(loader);
 
         setTimeout(() => {
-          // Filter by category if not 'All'
           let filtered = articles;
 
           if (currentCategoryFilter !== "All") {
-            filtered = filtered.filter(
-              (a) => a.category.toLowerCase() === currentCategoryFilter.toLowerCase()
-            );
+            filtered = filtered.filter(a => a.category.toLowerCase() === currentCategoryFilter.toLowerCase());
           }
 
-          // Search filter
           const term = currentSearchTerm.trim().toLowerCase();
           if (term) {
-            filtered = filtered.filter(
-              (a) =>
-                a.title.toLowerCase().includes(term) ||
-                a.summary.toLowerCase().includes(term) ||
-                a.tags.some((t) => t.toLowerCase().includes(term))
+            filtered = filtered.filter(a =>
+              a.title.toLowerCase().includes(term) ||
+              a.summary.toLowerCase().includes(term) ||
+              a.tags.some(t => t.toLowerCase().includes(term))
             );
           }
 
-          // Pagination
           const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
           const pageItems = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-          // Append articles to feed or mark end
           if (pageItems.length === 0) {
             allArticlesLoaded = true;
             if (currentPage === 1) {
-              // No articles found
               articleFeed.innerHTML = '<p class="text-muted">No articles found.</p>';
             }
           } else {
-            pageItems.forEach((art) => {
+            pageItems.forEach(art => {
               articleFeed.appendChild(createArticleCard(art));
             });
-            currentPage += 1;
+            currentPage++;
           }
-
           loadingArticles = false;
           loader.remove();
         }, 600);
       }
 
-      // Clear and reload articles (for new filter/search)
       function reloadArticles() {
         currentPage = 1;
         allArticlesLoaded = false;
@@ -1586,11 +1442,10 @@
         fetchArticles();
       }
 
-      // Open article modal and show full content
       let currentArticleId = null;
       function openArticleModal(articleId) {
         currentArticleId = articleId;
-        const art = articles.find((a) => a.id === articleId);
+        const art = articles.find(a => a.id === articleId);
         if (!art) return;
 
         articleModalLabel.textContent = art.title;
@@ -1599,7 +1454,7 @@
         articleModalContent.textContent = art.content;
 
         articleModalTags.innerHTML = "";
-        art.tags.forEach((tag) => {
+        art.tags.forEach(tag => {
           const tagEl = document.createElement("span");
           tagEl.className = "article-tag";
           tagEl.textContent = tag;
@@ -1607,11 +1462,9 @@
         });
 
         renderComments(articleId);
-
         articleModal.show();
       }
 
-      // Render comments for article modal
       function renderComments(articleId) {
         commentList.innerHTML = "";
         const articleComments = comments[articleId] || [];
@@ -1622,8 +1475,7 @@
           commentList.appendChild(li);
           return;
         }
-
-        articleComments.forEach((c) => {
+        articleComments.forEach(c => {
           const li = document.createElement("li");
           li.className = "list-group-item";
           li.tabIndex = 0;
@@ -1632,8 +1484,7 @@
         });
       }
 
-      // Add comment handler
-      commentForm.addEventListener("submit", (e) => {
+      commentForm.addEventListener("submit", e => {
         e.preventDefault();
         if (!loggedInUser) {
           alert("Please login to post comments.");
@@ -1657,31 +1508,27 @@
         commentInput.value = "";
       });
 
-      // User menu toggle
       userMenuBtn.addEventListener("click", () => {
         userMenu.classList.toggle("show");
       });
 
-      // Hide user menu on outside click or escape
-      document.addEventListener("click", (event) => {
+      document.addEventListener("click", event => {
         if (!userMenu.contains(event.target) && event.target !== userMenuBtn) {
           userMenu.classList.remove("show");
         }
       });
-      document.addEventListener("keydown", (e) => {
+      document.addEventListener("keydown", e => {
         if (e.key === "Escape") {
           userMenu.classList.remove("show");
         }
       });
 
-      // Login menu item click
-      loginMenuItem.addEventListener("click", (e) => {
+      loginMenuItem.addEventListener("click", e => {
         e.preventDefault();
         userMenu.classList.remove("show");
         loginModal.show();
       });
 
-      // Logout menu item click
       logoutMenuItem.addEventListener("click", () => {
         loggedInUser = null;
         updateUserMenu();
@@ -1690,28 +1537,22 @@
         saveState();
       });
 
-      // Profile menu item click - opens create topic modal (as simple profile action for demo)
       profileMenuItem.addEventListener("click", () => {
         userMenu.classList.remove("show");
         createTopicModal.show();
       });
 
-      // Login form submit
-      loginForm.addEventListener("submit", (e) => {
+      loginForm.addEventListener("submit", e => {
         e.preventDefault();
         const username = usernameInput.value.trim();
         const password = passwordInput.value;
-
-        if (
-          username === AUTH_USERNAME &&
-          password === AUTH_PASSWORD
-        ) {
-          loggedInUser = { username: username };
+        if (username === AUTH_USERNAME && password === AUTH_PASSWORD) {
+          loggedInUser = { username };
           loginError.style.display = "none";
           loginModal.hide();
           usernameInput.value = "";
           passwordInput.value = "";
-          showWelcomeNotification();
+          alert(`Welcome, ${username}! You are now logged in.`);
           updateUserMenu();
           fabAddPost.style.display = "flex";
           saveState();
@@ -1720,7 +1561,6 @@
         }
       });
 
-      // Update user menu UI based on logged in state
       function updateUserMenu() {
         if (loggedInUser) {
           loginMenuItem.style.display = "none";
@@ -1735,18 +1575,12 @@
         }
       }
 
-      // Show a welcome toast or alert
-      function showWelcomeNotification() {
-        alert(`Welcome, ${loggedInUser.username}! You are now logged in.`);
-      }
-
-      // Create Topic form submit
-      createTopicForm.addEventListener("submit", (e) => {
+      createTopicForm.addEventListener("submit", e => {
         e.preventDefault();
         const name = topicNameInput.value.trim();
         const color = topicColorInput.value || "#3f51b5";
 
-        if (categories.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+        if (categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
           alert("Topic name must be unique.");
           return;
         }
@@ -1768,10 +1602,9 @@
         topicColorInput.value = "#3f51b5";
       });
 
-      // Update post topic <select> options with current categories
       function updatePostTopicOptions() {
         postTopicSelect.innerHTML = "";
-        categories.forEach((c) => {
+        categories.forEach(c => {
           const option = document.createElement("option");
           option.value = c.id;
           option.textContent = c.name;
@@ -1779,21 +1612,23 @@
         });
       }
 
-      // Create Post form submit
-      createPostForm.addEventListener("submit", (e) => {
+      createPostForm.addEventListener("submit", e => {
         e.preventDefault();
         const title = postTitleInput.value.trim();
         const topicId = postTopicSelect.value;
         const content = postContentInput.value.trim();
         const tagsRaw = postTagsInput.value.trim();
-        const imageUrl = postImageUrlInput.value.trim() || `https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/2416aea0-0460-4fd2-832c-004277a43ee9.png
+        let imageUrl = postImageUrlInput.value.trim();
+        if (!imageUrl) {
+          imageUrl = "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/936865fb-7e1c-48ce-9363-2f2f98592987.png";
+        }
 
         if (!title || !topicId || !content) {
           alert("Please fill all required fields.");
           return;
         }
 
-        const category = categories.find((c) => c.id === topicId);
+        const category = categories.find(c => c.id === topicId);
         if (!category) {
           alert("Invalid topic selected.");
           return;
@@ -1808,15 +1643,14 @@
           source: "User Blog",
           publishedAt: new Date().toISOString(),
           category: category.name,
-          tags: tagsRaw ? tagsRaw.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean) : [],
+          tags: tagsRaw ? tagsRaw.split(",").map(t => t.trim().toLowerCase()).filter(Boolean) : [],
           imageUrl,
-          readTime: Math.max(3, Math.round(content.length / 300)), // Rough estimate: 300 chars ~ 1 min
+          readTime: Math.max(3, Math.round(content.length / 300)),
           views: 0,
         };
         articles.unshift(newArticle);
 
-        // Increment category article count
-        const catIndex = categories.findIndex((c) => c.id === topicId);
+        const catIndex = categories.findIndex(c => c.id === topicId);
         if (catIndex >= 0) {
           categories[catIndex].articleCount++;
         }
@@ -1827,7 +1661,6 @@
         reloadArticles();
         createPostModal.hide();
 
-        // Clear form fields
         postTitleInput.value = "";
         postTopicSelect.selectedIndex = 0;
         postContentInput.value = "";
@@ -1835,7 +1668,6 @@
         postImageUrlInput.value = "";
       });
 
-      // Dark mode toggle
       darkModeToggle.addEventListener("click", () => {
         if (document.documentElement.getAttribute("data-theme") === "dark") {
           document.documentElement.removeAttribute("data-theme");
@@ -1849,27 +1681,20 @@
         saveState();
       });
 
-      // Search input
       searchInput.addEventListener("input", () => {
-        const val = searchInput.value.trim();
-        currentSearchTerm = val;
+        currentSearchTerm = searchInput.value.trim();
         currentPage = 1;
         allArticlesLoaded = false;
         clearArticles();
         fetchArticles();
       });
 
-      // Infinite scroll loading for article feed
       articleFeed.addEventListener("scroll", () => {
-        if (
-          articleFeed.scrollTop + articleFeed.clientHeight >=
-          articleFeed.scrollHeight - 60
-        ) {
+        if (articleFeed.scrollTop + articleFeed.clientHeight >= articleFeed.scrollHeight - 60) {
           fetchArticles();
         }
       });
 
-      // Show floating add post button only when user logged in
       function updateFabVisibility() {
         if (loggedInUser) {
           fabAddPost.style.display = "flex";
@@ -1877,17 +1702,14 @@
           fabAddPost.style.display = "none";
         }
       }
+
       fabAddPost.addEventListener("click", () => {
         createPostModal.show();
       });
 
-      // Open New Topic modal from a prompt on header? For demo: open from user profile menu
-
-      // Initialize app
       function init() {
         loadState();
 
-        // Apply theme from prefs
         if (userPreferences.theme === "dark") {
           document.documentElement.setAttribute("data-theme", "dark");
           darkModeIcon.textContent = "light_mode";
@@ -1896,7 +1718,6 @@
           darkModeIcon.textContent = "dark_mode";
         }
 
-        // Setup sample/demo data if needed
         setupDemoData();
 
         renderCategoryTabs();
@@ -1908,21 +1729,13 @@
         updatePostTopicOptions();
         updateFabVisibility();
 
-        // Start loading first articles
         reloadArticles();
       }
 
       init();
 
-      // Accessibility enhancements: close modals on escape key globally
-      document.addEventListener("keydown", (e) => {
-        if (
-          e.key === "Escape" &&
-          (loginModalEl.classList.contains("show") ||
-            createTopicModalEl.classList.contains("show") ||
-            createPostModalEl.classList.contains("show") ||
-            articleModalEl.classList.contains("show"))
-        ) {
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && (loginModalEl.classList.contains("show") || createTopicModalEl.classList.contains("show") || createPostModalEl.classList.contains("show") || articleModalEl.classList.contains("show"))) {
           bootstrap.Modal.getInstance(document.querySelector(".modal.show")).hide();
         }
       });
